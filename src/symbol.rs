@@ -1,7 +1,7 @@
 /// 横线
 pub const HOR: char = '─';
 /// 叉号
-pub const CROSS: char = '├';
+pub const CRO: char = '├';
 /// 竖线
 pub const VER: char = '│';
 /// 末尾符号

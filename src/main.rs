@@ -1,6 +1,15 @@
-mod symbol;
+use std::path::Path;
 
 use clap::Parser;
+use globset::Glob;
+
+use crate::core::DirTree;
+
+mod symbol;
+mod pojo;
+mod core;
+mod filter;
+mod fileiterator;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -24,6 +33,25 @@ struct Args {
 
 
 fn main() {
-    let args = Args::parse();
-    println!("args: {:#?}!", args);
+    let Args { show_all, color_on, dir, include_pattern, max_level } = Args::parse();
+    let path = Path::new(&dir);
+    let mut mt = term::stdout().expect("Could not unwrap term::stdout.");
+    let config = pojo::Config {
+        colorful: color_on,
+        show_all,
+        max_level,
+        include_glob: include_pattern.map(|pat| {
+            Glob::new(pat.as_str()).expect("include_pattern is not valid").compile_matcher()
+        }),
+    };
+    let dir_tree = DirTree::new(config, &mut mt);
+
+
+    mt.fg(term::color::GREEN).unwrap();
+    write!(mt, "hello, ").unwrap();
+
+    mt.fg(term::color::RED).unwrap();
+    writeln!(mt, "world!").unwrap();
+
+    mt.reset().unwrap();
 }

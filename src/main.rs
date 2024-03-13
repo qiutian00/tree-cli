@@ -58,11 +58,10 @@ fn main() {
         }),
     };
     let mut dir_tree = DirTree::new(config, &mut mt);
-    let DirSummary { num_folders, num_files } = dir_tree.print_folders(&path).expect("execution failure");
+    let DirSummary {
+        num_folders,
+        num_files,
+    } = dir_tree.print_folders(&path).expect("execution failure");
 
-    writeln!(
-        mt,
-        "\n{} directories, {} files",
-        num_folders, num_files
-    ).unwrap()
+    writeln!(mt, "\n{} directories, {} files", num_folders, num_files).unwrap()
 }

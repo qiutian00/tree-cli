@@ -16,7 +16,6 @@ pub const END: char = '└';
 /// 空格
 pub const SPACE: char = ' ';
 
-
 pub fn set_line_prefix(symbol_switch_list: &Vec<bool>, prefix: &mut String) {
     let len = symbol_switch_list.len();
     let index = len.saturating_sub(1);

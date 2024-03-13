@@ -1,10 +1,10 @@
 use std::io;
 use std::path::Path;
 
-use crate::Config;
 use crate::file_iterator::{FileItem, FileIterator};
 use crate::filter::FilteredIterator;
 use crate::symbol::{print_path, set_line_prefix};
+use crate::Config;
 
 pub struct DirTree<'a> {
     term: &'a mut Box<term::StdoutTerminal>,

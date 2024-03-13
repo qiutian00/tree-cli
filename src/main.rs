@@ -9,7 +9,7 @@ mod symbol;
 mod pojo;
 mod core;
 mod filter;
-mod fileiterator;
+mod file_iterator;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]

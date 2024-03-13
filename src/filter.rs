@@ -23,8 +23,6 @@ impl FilteredIterator {
         self.skip = true;
     }
 
-    /// Remove previous directories from cache that shouldn't be
-    /// shown because they are empty.
     fn remove_empty_directories_from_cache(&mut self, item: &FileItem) {
         while let Some(last) = self.cache.pop_back() {
             if last.level < item.level {

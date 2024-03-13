@@ -17,7 +17,6 @@ A simple cross-platform alternative to the unix `tree` command.
     ├── file_iterator.rs
     ├── filter.rs
     ├── main.rs
-    ├── pojo.rs
     └── symbol.rs
 
 3 directories, 11 files

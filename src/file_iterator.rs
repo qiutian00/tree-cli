@@ -1,34 +1,65 @@
-use std::{fs, io};
 use std::collections::VecDeque;
-use std::fs::DirEntry;
-use std::path::Path;
+use std::fs::{DirEntry, Metadata};
+use std::path::{Path, PathBuf};
+use std::{fs, io};
 
+use crate::Config;
 use globset::GlobMatcher;
 
-use crate::pojo::FileItem;
-
 #[derive(Debug)]
-pub struct FileIteratorConfig {
-    pub show_hidden: bool,
-    pub max_level: usize,
-    pub include_glob: Option<GlobMatcher>,
+pub struct FileItem {
+    pub file_name: String,
+    pub path: PathBuf,
+    pub metadata: io::Result<Metadata>,
+    pub level: usize,
+    pub is_last: bool,
+}
+
+impl FileItem {
+    pub fn new(path: &Path, level: usize, is_last: bool) -> FileItem {
+        let metadata = path.symlink_metadata();
+        let file_name = path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .or_else(|| path.to_str())
+            .unwrap_or("");
+
+        FileItem {
+            file_name: file_name.to_string(),
+            path: path.to_owned(),
+            metadata,
+            level,
+            is_last,
+        }
+    }
+
+    pub fn is_dir(&self) -> bool {
+        self.metadata.as_ref().map(|m| m.is_dir()).unwrap_or(false)
+    }
 }
 
 #[derive(Debug)]
 pub struct FileIterator {
     queue: VecDeque<FileItem>,
-    config: FileIteratorConfig,
+    show_hidden: bool,
+    max_level: usize,
+    include_glob: Option<GlobMatcher>,
 }
 
 impl FileIterator {
-    pub fn new(path: &Path, config: FileIteratorConfig) -> FileIterator {
+    pub fn new(path: &Path, config: &Config) -> FileIterator {
         let mut queue = VecDeque::new();
         queue.push_back(FileItem::new(path, 0, true));
-        FileIterator { queue, config }
+        FileIterator {
+            queue,
+            max_level: config.max_level,
+            show_hidden: config.show_all,
+            include_glob: config.include_glob.clone(),
+        }
     }
 
     fn is_glob_included(&self, file_name: &str) -> bool {
-        if let Some(ref glob) = self.config.include_glob {
+        if let Some(ref glob) = self.include_glob {
             glob.is_match(file_name)
         } else {
             true
@@ -36,7 +67,7 @@ impl FileIterator {
     }
 
     fn is_included(&self, name: &str, is_dir: bool) -> bool {
-        if !self.config.show_hidden && name.starts_with('.') {
+        if !self.show_hidden && name.starts_with('.') {
             return false;
         }
 
@@ -54,7 +85,8 @@ impl FileIterator {
         );
         let mut dir_entries: Vec<DirEntry> = fs::read_dir(&item.path)
             .expect(&err_msg)
-            .into_iter().collect::<io::Result<Vec<_>>>()
+            .into_iter()
+            .collect::<io::Result<Vec<_>>>()
             .expect(&err_msg);
         dir_entries.sort_by(|a, b| b.file_name().cmp(&a.file_name()));
 
@@ -79,10 +111,9 @@ impl Iterator for FileIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(item) = self.queue.pop_back() {
-            if item.is_dir() && item.level < self.config.max_level {
+            if item.is_dir() && item.level < self.max_level {
                 self.push_dir(&item);
             }
-
             Some(item)
         } else {
             None

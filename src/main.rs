@@ -1,18 +1,17 @@
 use std::path::Path;
 
 use clap::Parser;
-use globset::Glob;
+use globset::{Glob, GlobMatcher};
 
-use crate::core::DirTree;
+use crate::core::{DirSummary, DirTree};
 
-mod symbol;
-mod pojo;
 mod core;
-mod filter;
 mod file_iterator;
+mod filter;
+mod symbol;
 
 #[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
+#[command(version, about, long_about = None, author)]
 struct Args {
     /// Show all files (include hidden files)
     #[arg(short = 'a', long = "all")]
@@ -31,27 +30,39 @@ struct Args {
     max_level: usize,
 }
 
+struct Config {
+    colorful: bool,
+    show_all: bool,
+    max_level: usize,
+    include_glob: Option<GlobMatcher>,
+}
 
 fn main() {
-    let Args { show_all, color_on, dir, include_pattern, max_level } = Args::parse();
+    let Args {
+        show_all,
+        color_on,
+        dir,
+        include_pattern,
+        max_level,
+    } = Args::parse();
     let path = Path::new(&dir);
     let mut mt = term::stdout().expect("Could not unwrap term::stdout.");
-    let config = pojo::Config {
+    let config = Config {
         colorful: color_on,
         show_all,
         max_level,
         include_glob: include_pattern.map(|pat| {
-            Glob::new(pat.as_str()).expect("include_pattern is not valid").compile_matcher()
+            Glob::new(pat.as_str())
+                .expect("include_pattern is not valid")
+                .compile_matcher()
         }),
     };
-    let dir_tree = DirTree::new(config, &mut mt);
+    let mut dir_tree = DirTree::new(config, &mut mt);
+    let DirSummary { num_folders, num_files } = dir_tree.print_folders(&path).expect("execution failure");
 
-
-    mt.fg(term::color::GREEN).unwrap();
-    write!(mt, "hello, ").unwrap();
-
-    mt.fg(term::color::RED).unwrap();
-    writeln!(mt, "world!").unwrap();
-
-    mt.reset().unwrap();
+    writeln!(
+        mt,
+        "\n{} directories, {} files",
+        num_folders, num_files
+    ).unwrap()
 }

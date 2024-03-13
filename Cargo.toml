@@ -2,6 +2,8 @@
 name = "tree-cli"
 version = "0.1.0"
 edition = "2021"
+authors = ["Kurisu <lucifer994@gmail.com>"]
+description = "A simple cross-platform alternative to the unix `tree` command."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

@@ -1,10 +1,9 @@
 use std::collections::VecDeque;
-use crate::file_iterator::FileIterator;
 
-use crate::pojo::{FileItem};
+use crate::file_iterator::{FileItem, FileIterator};
 
 pub struct FilteredIterator {
-    pub current: FileIterator,
+    current: FileIterator,
     cache: VecDeque<FileItem>,
     skip: bool,
     next_item: Option<FileItem>,
@@ -43,23 +42,18 @@ impl Iterator for FilteredIterator {
         if self.skip {
             return self.current.next();
         }
-
         if let Some(cache_item) = self.cache.pop_front() {
             return Some(cache_item);
         }
-
         if let Some(next_item) = self.next_item.take() {
             return Some(next_item);
         }
-
         while let Some(item) = self.current.next() {
             self.remove_empty_directories_from_cache(&item);
 
             if item.is_dir() {
                 self.cache.push_back(item)
             } else {
-                // If the cache already contains a folder, start emptying cache, and
-                // save the item.
                 return if let Some(cache_front) = self.cache.pop_front() {
                     self.next_item = Some(item);
                     Some(cache_front)
@@ -68,7 +62,6 @@ impl Iterator for FilteredIterator {
                 };
             }
         }
-
         None
     }
 }

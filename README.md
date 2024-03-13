@@ -1,10 +1,13 @@
 # tree-cli
 A simple cross-platform alternative to the unix `tree` command.
 
-### 🚧👷‍♂️ Construction in progress
+## Usage
+`cargo build --release`
+
 ## Example 
 ```shell
-❯ tree-cli
+./target/release/tree-cli
+
 .
 ├── Cargo.lock
 ├── Cargo.toml

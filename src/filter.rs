@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
+use crate::file_iterator::FileIterator;
 
-use crate::pojo::{FileItem, FileIterator};
+use crate::pojo::{FileItem};
 
 pub struct FilteredIterator {
     pub current: FileIterator,
@@ -64,7 +65,7 @@ impl Iterator for FilteredIterator {
                     Some(cache_front)
                 } else {
                     Some(item)
-                }
+                };
             }
         }
 

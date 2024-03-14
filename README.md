@@ -30,4 +30,4 @@ A simple cross-platform alternative to the unix `tree` command.
 
 or 
 
-`cargo install --path https://github.com/kurisu994/tree-cli.git`
+`cargo install --git  https://github.com/kurisu994/tree-cli.git`

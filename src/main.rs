@@ -16,9 +16,12 @@ struct Args {
     /// Show all files (include hidden files)
     #[arg(short = 'a', long = "all")]
     show_all: bool,
-    /// Turn colorization off always
+    /// Turn colorization on always
     #[arg(short = 'C', long = "color")]
     color_on: bool,
+    /// Turn colorization off always
+    #[arg(short = 'N', long = "no-color")]
+    color_off: bool,
     /// Directory you want to search
     #[arg(value_name = "DIR", default_value = ".")]
     dir: String,
@@ -41,6 +44,7 @@ fn main() {
     let Args {
         show_all,
         color_on,
+        color_off,
         dir,
         include_pattern,
         max_level,
@@ -48,7 +52,7 @@ fn main() {
     let path = Path::new(&dir);
     let mut mt = term::stdout().expect("Could not unwrap term::stdout.");
     let config = Config {
-        colorful: color_on,
+        colorful: color_on || !color_off,
         show_all,
         max_level,
         include_glob: include_pattern.map(|pat| {

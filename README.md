@@ -24,3 +24,10 @@ A simple cross-platform alternative to the unix `tree` command.
 
 3 directories, 11 files
 ```
+
+## Install 
+`cargo install --path .` 
+
+or 
+
+`cargo install --path https://github.com/kurisu994/tree-cli.git`

@@ -66,24 +66,42 @@ fn write_color(
     if config.colorful {
         t.fg(color)?;
     }
-
     write!(t, "{}", str)?;
-
     if config.colorful {
         t.reset()?;
     }
-
     Ok(())
 }
 
-#[cfg(not(target_os = "linux"))]
-fn is_executable(_metadata: &Metadata) -> bool {
+#[cfg(target_os = "windows")]
+fn is_executable(metadata: &Metadata) -> bool {
+    // fixme 没有windows电脑所以不确定是否正确
+    use std::os::windows::fs::{MetadataExt, PermissionsExt};
+    if !metadata.is_file() || metadata.permissions().readonly() {
+        return false;
+    }
+    let path = match metadata.file_name().into_string() {
+        Ok(path) => path,
+        Err(_) => return false,
+    };
+    let ext = path.extension();
+    let executable_extensions = ["exe", "dll", "com", "sys", "bat", "cmd"];
+    if let Some(ext_str) = ext {
+        if executable_extensions.contains(&ext_str.to_ascii_lowercase()) {
+            return true;
+        }
+    }
     false
 }
 
-#[cfg(target_os = "linux")]
+// 仅针对macOS和Windows
+#[cfg(any(target_os = "macos", target_os = "linux"))]
 fn is_executable(metadata: &Metadata) -> bool {
     use std::os::unix::fs::PermissionsExt;
-    let mode = metadata.permissions().mode();
-    (mode & 0o100) != 0
+    metadata.is_file() && metadata.permissions().mode() & 0o111 != 0
+}
+
+#[cfg(not(any(target_os = "macos", target_os = "linux", target_os = "windows")))]
+fn is_executable(metadata: &Metadata) -> bool {
+    false
 }

@@ -70,7 +70,6 @@ impl FileIterator {
         if !self.show_hidden && name.starts_with('.') {
             return false;
         }
-
         if is_dir {
             true
         } else {
